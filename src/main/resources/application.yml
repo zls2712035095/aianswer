@@ -1,6 +1,4 @@
 # 公共配置文件
-# @author <a href="https://github.com/zls">程序员鱼皮</a>
-# @from <a href="https://zls.icu">编程导航知识星球</a>
 spring:
   application:
     name: AiAnswer-backend
@@ -13,24 +11,21 @@ spring:
       matching-strategy: ant_path_matcher
   # session 配置
   session:
-    # todo 取消注释开启分布式 session（须先配置 Redis）
-    # store-type: redis
+    store-type: redis
     # 30 天过期
     timeout: 2592000
   # 数据库配置
-  # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/aiAnswer_db
     username: root
     password: root
   # Redis 配置
-  # todo 需替换配置，然后取消注释
-#  redis:
-#    database: 1
-#    host: localhost
-#    port: 6379
-#    timeout: 5000
+  redis:
+    database: 1
+    host: localhost
+    port: 6379
+    timeout: 5000
 #    password: 123456
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
@@ -43,6 +38,37 @@ spring:
     multipart:
       # 大小限制
       max-file-size: 10MB
+  # 分库分表配置
+  shardingsphere:
+    #数据源配置
+    datasource:
+      # 多数据源以逗号隔开即可
+      names: aiAnswer_db
+      aiAnswer_db:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/aiAnswer_db
+        username: root
+        password: root
+    # 规则配置
+    rules:
+      sharding:
+        # 分片算法配置
+        sharding-algorithms:
+          # 自定义分片规则名
+          answer-table-inline:
+            ## inline 类型是简单的配置文件里面就能写的类型，其他还有自定义类等等
+            type: INLINE
+            props:
+              algorithm-expression: user_answer_$->{appId % 2}
+        tables:
+          user_answer:
+            actual-data-nodes: aiAnswer_db.user_answer_$->{0..1}
+            # 分表策略
+            table-strategy:
+              standard:
+                sharding-column: appId
+                sharding-algorithm-name: answer-table-inline
 server:
   address: 0.0.0.0
   port: 8101
@@ -61,27 +87,6 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
-# 微信相关
-wx:
-  # 微信公众平台
-  # todo 需替换配置
-  mp:
-    token: xxx
-    aesKey: xxx
-    appId: xxx
-    secret: xxx
-    config-storage:
-      http-client-type: HttpClient
-      key-prefix: wx
-      redis:
-        host: 127.0.0.1
-        port: 6379
-      type: Memory
-  # 微信开放平台
-  # todo 需替换配置
-  open:
-    appId: xxx
-    appSecret: xxx
 # 对象存储
 # todo 需替换配置
 cos:
@@ -101,3 +106,6 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.zls.aianswer.controller
+# AI 配置
+ai:
+  apiKey: b00870945309e4868a0503c67a2f8bc2.fiI7xBDFWWmlZx67
