@@ -11,8 +11,8 @@
         <router-view />
       </a-layout-content>
       <a-layout-footer class="footer">
-        <a href="https://www.code-nav.cn" target="_blank">
-          zls的github
+        <a href="https://github.com/zls2712035095/aianswer" target="_blank">
+          zls 的 github
         </a>
       </a-layout-footer>
     </a-layout>
